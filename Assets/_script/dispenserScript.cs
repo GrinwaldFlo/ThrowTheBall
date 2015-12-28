@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using NDream.AirConsole;
 using Newtonsoft.Json.Linq;
 
-public class test2dispenserScript : MonoBehaviour
+public class dispenserScript : MonoBehaviour
 {
 	public GameObject goElem;
 	public GameObject prefabElem;
@@ -17,7 +17,7 @@ public class test2dispenserScript : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		Test2logic.OnInit += Test2logic_OnInit;
+		logicScript.OnInit += Test2logic_OnInit;
 	}
 
 	private void Test2logic_OnInit()
@@ -31,7 +31,7 @@ public class test2dispenserScript : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		if(Test2Gvar.started)
+		if(Gvar.started)
 		{
 			if(Time.time > nextDrop)
 			{

@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class test2zoneScript : MonoBehaviour
+public class zoneScript : MonoBehaviour
 {
 	public int counter = 0;
 	public Text scoreTxt;
@@ -10,10 +10,10 @@ public class test2zoneScript : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		Test2logic.OnInit += Test2logic_OnInit;
+		logicScript.OnInit += logicScript_OnInit;
 	}
 
-	private void Test2logic_OnInit()
+	private void logicScript_OnInit()
 	{
 		counter = 0;
 	}

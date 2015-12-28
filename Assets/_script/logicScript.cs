@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using NDream.AirConsole;
 using Newtonsoft.Json.Linq;
 
-public class Test2logic : MonoBehaviour
+public class logicScript : MonoBehaviour
 {
 	public const int nbPlayerMax = 20;
 	public delegate void InitAction();
@@ -21,7 +21,7 @@ public class Test2logic : MonoBehaviour
 
 	public GameObject[] zone;
 
-	private test2playerScript[] lstPlayer = new test2playerScript[nbPlayerMax];
+	private playerScript[] lstPlayer = new playerScript[nbPlayerMax];
 
 	public int[] nbPlayer = new int[2];
 
@@ -40,7 +40,7 @@ public class Test2logic : MonoBehaviour
 	{
 		Debug.Log("Ready " + code);
 		init();
-		Test2Gvar.started = true;
+		Gvar.started = true;
 	}
 
 	private void init()
@@ -72,7 +72,7 @@ public class Test2logic : MonoBehaviour
 		{
 			if(lstPlayer[i] != null)
 			{
-				side = lstPlayer[i].GetComponent<test2playerScript>().side;
+				side = lstPlayer[i].GetComponent<playerScript>().side;
 				nbPlayer[side]++;
 				playerTxt[side].text += AirConsole.instance.GetNickname(lstPlayer[i].deviceId) + "\r\n";
 			}
@@ -207,7 +207,7 @@ Message from 2 {
 		GameObject newPlayer = Instantiate(prefabPlayer);
 		newPlayer.transform.SetParent(goPlayer.transform);
 
-		test2playerScript newScript = newPlayer.GetComponent<test2playerScript>();
+		playerScript newScript = newPlayer.GetComponent<playerScript>();
 		newScript.deviceId = device_id;
 		newScript.player = numPlayer;
 
@@ -238,8 +238,8 @@ Message from 2 {
 	// Update is called once per frame
 	void Update()
 	{
-		Test2Gvar.movePlayerFactor = movePlayerFactor;
-		Test2Gvar.throwElemFactor = throwElemFactor;
-		Test2Gvar.movePlayerVmax = movePlayerVmax;
+		Gvar.movePlayerFactor = movePlayerFactor;
+		Gvar.throwElemFactor = throwElemFactor;
+		Gvar.movePlayerVmax = movePlayerVmax;
 	}
 }

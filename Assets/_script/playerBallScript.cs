@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class test2PlayerElemScript : MonoBehaviour
+public class playerBallScript : MonoBehaviour
 {
 	private List<GameObject> lstElem = new List<GameObject>();
 

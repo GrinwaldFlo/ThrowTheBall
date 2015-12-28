@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class test2playerScript : MonoBehaviour
+public class playerScript : MonoBehaviour
 {
 	internal int deviceId;
 	internal int player;
 	internal int side;
 
 	internal Rigidbody rbody;
-	private test2PlayerElemScript elemScript;
+	private playerBallScript elemScript;
 
 	private Vector3 curForce;
 
@@ -19,7 +19,7 @@ public class test2playerScript : MonoBehaviour
 	{
 		rbody = GetComponent<Rigidbody>();
 
-		elemScript = GetComponentInChildren<test2PlayerElemScript>();
+		elemScript = GetComponentInChildren<playerBallScript>();
 
 		MeshRenderer m = GetComponent<MeshRenderer>();
 		m.material.color = Random.ColorHSV();
@@ -33,13 +33,13 @@ public class test2playerScript : MonoBehaviour
 
 	public void FixedUpdate()
 	{
-		if (joyActive && rbody.velocity.magnitude < Test2Gvar.movePlayerVmax)
+		if (joyActive && rbody.velocity.magnitude <Gvar.movePlayerVmax)
 			rbody.AddRelativeForce(curForce, ForceMode.Acceleration);
 	}
 
 	internal void move(float x1, float y1)
 	{
-		curForce = new Vector3(x1, 0f, -y1) * Test2Gvar.movePlayerFactor;
+		curForce = new Vector3(x1, 0f, -y1) * Gvar.movePlayerFactor;
 		joyActive = true;
 	}
 
@@ -57,6 +57,6 @@ public class test2playerScript : MonoBehaviour
 		Vector3 v = new Vector3(1, 1, 0).normalized;
 		v = Quaternion.Euler(0, angle, 0) * v;
 
-		elem.GetComponent<Rigidbody>().AddForce(v * Test2Gvar.throwElemFactor, ForceMode.Impulse);
+		elem.GetComponent<Rigidbody>().AddForce(v * Gvar.throwElemFactor, ForceMode.Impulse);
 	}
 }
