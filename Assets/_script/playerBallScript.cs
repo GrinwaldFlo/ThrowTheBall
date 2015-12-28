@@ -5,13 +5,19 @@ using System;
 
 public class playerBallScript : MonoBehaviour
 {
-	private List<GameObject> lstElem = new List<GameObject>();
+	public List<GameObject> lstElem = new List<GameObject>();
 
 
 	// Use this for initialization
 	void Start()
 	{
+		logicScript.OnStateChange += LogicScript_OnStateChange;
+	}
 
+	private void LogicScript_OnStateChange()
+	{
+		if (Gvar.gameState == enGameState.Play)
+			lstElem.Clear();
 	}
 
 	// Update is called once per frame
@@ -22,12 +28,14 @@ public class playerBallScript : MonoBehaviour
 
 	public void OnTriggerEnter(Collider other)
 	{
+		Debug.Log("Add ball " + other.gameObject.name);
 		lstElem.Add(other.gameObject);
 		other.gameObject.GetComponent<Highlight>().isSelected = true;
 	}
 
 	public void OnTriggerExit(Collider other)
 	{
+		Debug.Log("Del ball " + other.gameObject.name);
 		lstElem.Remove(other.gameObject);
 		other.gameObject.GetComponent<Highlight>().isSelected = false;
 	}

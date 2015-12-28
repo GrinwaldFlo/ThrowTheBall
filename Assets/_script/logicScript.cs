@@ -7,23 +7,33 @@ using Newtonsoft.Json.Linq;
 
 public class logicScript : MonoBehaviour
 {
-	public const int nbPlayerMax = 20;
-	public delegate void InitAction();
-	public static event InitAction OnInit;
+
 
 	public GameObject goPlayer;
+	public GameObject goBall;
 
 	public GameObject prefabPlayer;
 	public float movePlayerFactor = 2f;
 	public float movePlayerVmax = 1f;
 	public float throwElemFactor = 10f;
 	public Text[] playerTxt;
+	public Text[] playerEndTxt;
 
 	public GameObject[] zone;
 
-	private playerScript[] lstPlayer = new playerScript[nbPlayerMax];
+	public GameObject introCanvas;
+	public GameObject readyCanvas;
+	public GameObject endCanvas;
 
-	public int[] nbPlayer = new int[2];
+	public float timeStateChange;
+
+	private playerScript[] lstPlayer = new playerScript[Gvar.nbPlayerMax];
+
+	public int[] nbPlayer = new int[Gvar.nbZone];
+
+	public delegate void StateChangeAction();
+	public static event StateChangeAction OnStateChange;
+
 
 	void Awake()
 	{
@@ -39,20 +49,70 @@ public class logicScript : MonoBehaviour
 	private void Instance_onReady(string code)
 	{
 		Debug.Log("Ready " + code);
-		init();
-		Gvar.started = true;
 	}
 
 	private void init()
 	{
-		if (OnInit != null)
-			OnInit();
-
-		for (int i = 0; i < goPlayer.transform.childCount ; i++)
+		for (int i = 0; i < goPlayer.transform.childCount; i++)
 		{
 			Destroy(goPlayer.transform.GetChild(i).gameObject);
 		}
 		updNbPlayer();
+		setGameState(enGameState.Intro);
+	}
+
+	private void setGameState(enGameState state)
+	{
+		if (Gvar.gameState != state)
+		{
+			Gvar.setGameState(state);
+			timeStateChange = Time.time;
+			if (OnStateChange != null)
+				OnStateChange();
+
+
+			switch (state)
+			{
+				case enGameState.Intro:
+					introCanvas.SetActive(true);
+					readyCanvas.SetActive(false);
+					endCanvas.SetActive(false);
+					break;
+				case enGameState.Ready:
+					introCanvas.SetActive(false);
+					readyCanvas.SetActive(true);
+					endCanvas.SetActive(false);
+					break;
+				case enGameState.Play:
+					introCanvas.SetActive(false);
+					readyCanvas.SetActive(false);
+					endCanvas.SetActive(false);
+					break;
+				case enGameState.End:
+
+					int looser = 0;
+					int winner = 0;
+
+					for (int i = 0; i < Gvar.score.Length; i++)
+					{
+						playerEndTxt[i].text = "";
+						if (Gvar.score[i] < Gvar.score[winner])
+							winner = i;
+						if (Gvar.score[i] > Gvar.score[looser])
+							looser = i;
+					}
+
+					playerEndTxt[looser].text = "You loose";
+					playerEndTxt[winner].text = "You win !";
+
+					introCanvas.SetActive(false);
+					readyCanvas.SetActive(false);
+					endCanvas.SetActive(true);
+					break;
+				default:
+					break;
+			}
+		}
 	}
 
 	private void updNbPlayer()
@@ -70,7 +130,7 @@ public class logicScript : MonoBehaviour
 		int side;
 		for (int i = 0; i < lstPlayer.Length; i++)
 		{
-			if(lstPlayer[i] != null)
+			if (lstPlayer[i] != null)
 			{
 				side = lstPlayer[i].GetComponent<playerScript>().side;
 				nbPlayer[side]++;
@@ -83,7 +143,7 @@ public class logicScript : MonoBehaviour
 	{
 		int numPlayer = AirConsole.instance.ConvertDeviceIdToPlayerNumber(from);
 
-		if(lstPlayer[numPlayer] == null)
+		if (lstPlayer[numPlayer] == null)
 		{
 			Debug.Log("Player " + numPlayer + " doesn't exists");
 			return;
@@ -93,12 +153,16 @@ public class logicScript : MonoBehaviour
 		{
 			if (data["swipeanalog-right"].Value<bool>("pressed") == true)
 			{
+				if (Gvar.gameState == enGameState.Intro)
+					setGameState(enGameState.Ready);
+				if (Gvar.gameState == enGameState.End && Time.time - timeStateChange > 2f)
+					setGameState(enGameState.Intro);
 				//				float x = data["swipeanalog-right"]["message"].Value<float>("x");
 				//				float y = data["swipeanalog-right"]["message"].Value<float>("y");
 				//				double a = data["swipeanalog-right"]["message"].Value<double>("angle");
 				float d = data["swipeanalog-right"]["message"].Value<float>("degree");
 
-				//Debug.Log("Swipe " + x + " " + y + " " + a + " " + d);
+				Debug.Log("Swipe " + d);
 				lstPlayer[numPlayer].askThrow(d);
 			}
 		}
@@ -174,7 +238,7 @@ Message from 2 {
 
 		if (lstPlayer[numPlayer] != null)
 		{
-			Destroy(lstPlayer[numPlayer]);
+			Destroy(lstPlayer[numPlayer].gameObject);
 			lstPlayer[numPlayer] = null;
 		}
 
@@ -188,12 +252,12 @@ Message from 2 {
 
 	private void Instance_onCustomDeviceStateChange(int device_id, JToken custom_device_data)
 	{
-		Debug.Log("Custom device state change " + device_id + " " + custom_device_data.ToString());
+		//Debug.Log("Custom device state change " + device_id + " " + custom_device_data.ToString());
 	}
 
 	private void Instance_onConnect(int device_id)
 	{
-		AirConsole.instance.SetActivePlayers(nbPlayerMax);
+		AirConsole.instance.SetActivePlayers(Gvar.nbPlayerMax);
 
 		Debug.Log("Connected " + device_id);
 
@@ -216,7 +280,7 @@ Message from 2 {
 		int selZone = 0;
 		for (int i = 1; i < nbPlayer.Length; i++)
 		{
-			if(nbPlayer[i] < nbPlayer[selZone])
+			if (nbPlayer[i] < nbPlayer[selZone])
 			{
 				selZone = i;
 			}
@@ -232,7 +296,7 @@ Message from 2 {
 	// Use this for initialization
 	void Start()
 	{
-		
+
 	}
 
 	// Update is called once per frame
@@ -241,5 +305,37 @@ Message from 2 {
 		Gvar.movePlayerFactor = movePlayerFactor;
 		Gvar.throwElemFactor = throwElemFactor;
 		Gvar.movePlayerVmax = movePlayerVmax;
+
+		if (Gvar.gameState == enGameState.Play)
+		{
+			for (int i = 0; i < Gvar.score.Length; i++)
+			{
+				if (Gvar.score[i] >= Gvar.scoreMax)
+				{
+					setGameState(enGameState.End);
+				}
+			}
+		}
+	}
+
+	public void FixedUpdate()
+	{
+		switch (Gvar.gameState)
+		{
+			case enGameState.Intro:
+				break;
+			case enGameState.Ready:
+				if (goBall.transform.childCount > 0)
+					Destroy(goBall.transform.GetChild(0).gameObject);
+				else
+					setGameState(enGameState.Play);
+				break;
+			case enGameState.Play:
+				break;
+			case enGameState.End:
+				break;
+			default:
+				break;
+		}
 	}
 }

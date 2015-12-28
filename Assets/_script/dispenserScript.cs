@@ -7,45 +7,48 @@ using Newtonsoft.Json.Linq;
 
 public class dispenserScript : MonoBehaviour
 {
-	public GameObject goElem;
-	public GameObject prefabElem;
-	public float dropTimeMs = 5;
-	public bool dropEnabled = false;
+	public GameObject goBall;
+	public GameObject prefabBall;
+	public float dropTimeMaxMs = 2f;
+	public float dropTimeMinMs = 0.3f;
+	private int maxBall = 1000;
 
 	float nextDrop = 0;
 
 	// Use this for initialization
 	void Start()
 	{
-		logicScript.OnInit += Test2logic_OnInit;
+		logicScript.OnStateChange += LogicScript_OnStateChange;
 	}
 
-	private void Test2logic_OnInit()
+	private void LogicScript_OnStateChange()
 	{
-		for (int i = 0; i < goElem.transform.childCount; i++)
-		{
-			Destroy(goElem.transform.GetChild(i).gameObject);
-		}
+		//for (int i = 0; i < goBall.transform.childCount; i++)
+		//{
+		//	Destroy(goBall.transform.GetChild(i).gameObject);
+		//}
 	}
+
 
 	// Update is called once per frame
 	void Update()
 	{
-		if(Gvar.started)
+		if(Gvar.gameState == enGameState.Play || Gvar.gameState == enGameState.Intro)
 		{
-			if(Time.time > nextDrop)
+			if(Time.time > nextDrop && goBall.transform.childCount < maxBall)
 			{
-				GameObject newPlayer = Instantiate(prefabElem);
-				newPlayer.transform.SetParent(goElem.transform);
+				GameObject newPlayer = Instantiate(prefabBall);
+				newPlayer.transform.SetParent(goBall.transform);
 
 				Collider col = this.GetComponent<Collider>();
 				newPlayer.transform.localPosition = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x), this.transform.localPosition.y, Random.Range(col.bounds.min.z, col.bounds.max.z));
 
 				//newPlayer.transform.localPosition = this.transform.position;
-				nextDrop = Time.time + dropTimeMs;
+				if(Gvar.gameState == enGameState.Play)
+					nextDrop = Time.time + Mathf.Lerp(dropTimeMinMs, dropTimeMaxMs, goBall.transform.childCount / Gvar.scoreMax);
+				else
+					nextDrop = Time.time + 0.2f;
 			}
 		}
 	}
-
-
 }

@@ -33,7 +33,7 @@ public class playerScript : MonoBehaviour
 
 	public void FixedUpdate()
 	{
-		if (joyActive && rbody.velocity.magnitude <Gvar.movePlayerVmax)
+		if (Gvar.gameState == enGameState.Play && joyActive && rbody.velocity.magnitude <Gvar.movePlayerVmax)
 			rbody.AddRelativeForce(curForce, ForceMode.Acceleration);
 	}
 
@@ -51,12 +51,14 @@ public class playerScript : MonoBehaviour
 	internal void askThrow(float angle)
 	{
 		GameObject elem = elemScript.getElem();
-		if (elem == null)
+		if (elem == null || Gvar.gameState != enGameState.Play)
+		{
+			Debug.Log("No ball");
 			return;
-
+		}
 		Vector3 v = new Vector3(1, 1, 0).normalized;
 		v = Quaternion.Euler(0, angle, 0) * v;
-
+		Debug.Log("throw at " + v.ToString());
 		elem.GetComponent<Rigidbody>().AddForce(v * Gvar.throwElemFactor, ForceMode.Impulse);
 	}
 }
