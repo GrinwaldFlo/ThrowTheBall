@@ -9,9 +9,9 @@ public class dispenserScript : MonoBehaviour
 {
 	public GameObject goBall;
 	public GameObject prefabBall;
-	public float dropTimeMaxMs = 2f;
-	public float dropTimeMinMs = 0.3f;
-	private int maxBall = 1000;
+	public float dropTimeMaxMs = 0.3f;
+	public float dropTimeMinMs = 0.2f;
+	private int maxBall = 400;
 
 	float nextDrop = 0;
 
